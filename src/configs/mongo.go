@@ -25,6 +25,8 @@ func ConnectDB() *mongo.Client {
 	return client
 }
 
+var DB *mongo.Client = ConnectDB()
+
 func GetCollection(client *mongo.Client, collection string) *mongo.Collection {
 	return client.Database("event-app-db").Collection(collection)
 }

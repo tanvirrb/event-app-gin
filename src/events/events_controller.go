@@ -55,51 +55,51 @@ func (c *EventController) Get(ctx *gin.Context) {
 	})
 }
 
-func (c *EventController) GetAll(ctx *gin.Context) {
-	events, err := c.service.GetAll()
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-	ctx.JSON(http.StatusOK, gin.H{
-		"data": events,
-	})
-}
-
-func (c *EventController) Update(ctx *gin.Context) {
-	id := ctx.Param("id")
-	var event models.Event
-	if err := ctx.ShouldBindJSON(&event); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-	updatedEvent, err := c.service.Update(id, &event)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{
-		"data": updatedEvent,
-	})
-}
-
-func (c *EventController) Delete(ctx *gin.Context) {
-	id := ctx.Param("id")
-	err := c.service.Delete(id)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "event deleted",
-	})
-}
+//func (c *EventController) GetAll(ctx *gin.Context) {
+//	events, err := c.service.GetAll()
+//	if err != nil {
+//		ctx.JSON(http.StatusInternalServerError, gin.H{
+//			"error": err.Error(),
+//		})
+//		return
+//	}
+//	ctx.JSON(http.StatusOK, gin.H{
+//		"data": events,
+//	})
+//}
+//
+//func (c *EventController) Update(ctx *gin.Context) {
+//	id := ctx.Param("id")
+//	var event models.Event
+//	if err := ctx.ShouldBindJSON(&event); err != nil {
+//		ctx.JSON(http.StatusBadRequest, gin.H{
+//			"error": err.Error(),
+//		})
+//		return
+//	}
+//	updatedEvent, err := c.service.Update(id, &event)
+//	if err != nil {
+//		ctx.JSON(http.StatusInternalServerError, gin.H{
+//			"error": err.Error(),
+//		})
+//		return
+//	}
+//
+//	ctx.JSON(http.StatusOK, gin.H{
+//		"data": updatedEvent,
+//	})
+//}
+//
+//func (c *EventController) Delete(ctx *gin.Context) {
+//	id := ctx.Param("id")
+//	err := c.service.Delete(id)
+//	if err != nil {
+//		ctx.JSON(http.StatusInternalServerError, gin.H{
+//			"error": err.Error(),
+//		})
+//		return
+//	}
+//	ctx.JSON(http.StatusOK, gin.H{
+//		"message": "event deleted",
+//	})
+//}

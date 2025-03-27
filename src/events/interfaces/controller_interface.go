@@ -7,7 +7,7 @@ import (
 type EventController interface {
 	Create(*gin.Context)
 	Get(*gin.Context)
-	GetAll(*gin.Context)
-	Update(*gin.Context)
-	Delete(*gin.Context)
+	//GetAll(*gin.Context)
+	//Update(*gin.Context)
+	//Delete(*gin.Context)
 }
