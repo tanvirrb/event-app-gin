@@ -21,11 +21,6 @@ func NewEventRepository() interfaces.EventRepository {
 	}
 }
 
-func GetObjectId(result *mongo.InsertOneResult) string {
-	return result.InsertedID.(primitive.ObjectID).Hex()
-
-}
-
 func (r *EventRepository) Create(event *models.Event) (*models.Event, error) {
 	encodedId, err := r.collection.InsertOne(context.TODO(), event)
 	if err != nil {
