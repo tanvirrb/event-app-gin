@@ -27,14 +27,12 @@ func GetObjectId(result *mongo.InsertOneResult) string {
 }
 
 func (r *EventRepository) Create(event *models.Event) (*models.Event, error) {
-	//event._Id = primitive.NewObjectID()
-	fmt.Printf("Event before save: %v", event)
-	data, err := r.collection.InsertOne(context.TODO(), event)
+	encodedId, err := r.collection.InsertOne(context.TODO(), event)
 	if err != nil {
 		return nil, err
 	}
 
-	eventId := data.InsertedID.(primitive.ObjectID)
+	eventId := encodedId.InsertedID.(primitive.ObjectID)
 	fmt.Printf("Event _Id after save: %v", eventId)
 	var createdEvent models.Event
 	err = r.collection.FindOne(context.Background(), primitive.M{"_id": eventId}).Decode(&createdEvent)
