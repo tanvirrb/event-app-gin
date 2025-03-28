@@ -4,10 +4,11 @@ services:
       context: .
       dockerfile: Dockerfile.dev
     ports:
-      - "3001:3001"
+      - "${PORT:-3001}:${PORT:-3001}"
     volumes:
       - .:/app
     environment:
+      - PORT=${PORT:-3001}
       - MONGODB_URI=mongodb://mongodb:27017
       - GIN_MODE=debug
     depends_on:
