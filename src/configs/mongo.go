@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
 	"os"
+	"time"
 )
 
-func ConnectDB() *mongo.Client {
+var DB *mongo.Client
+
+func ConnectDB() error {
 	uri := os.Getenv("MONGODB_URI")
 	if uri == "" {
 		uri = "mongodb://localhost:27017" // fallback for local development
@@ -17,20 +19,28 @@ func ConnectDB() *mongo.Client {
 
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("failed to connect to MongoDB: %v", err)
 	}
 
 	err = client.Ping(context.Background(), nil)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("failed to ping MongoDB: %v", err)
 	}
 
+	DB = client
 	fmt.Println("Connected to MongoDB!")
-	return client
+	return nil
 }
-
-var DB *mongo.Client = ConnectDB()
 
 func GetCollection(client *mongo.Client, collection string) *mongo.Collection {
 	return client.Database("event-app-db").Collection(collection)
+}
+
+func CloseDB() error {
+	if DB != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		return DB.Disconnect(ctx)
+	}
+	return nil
 }
