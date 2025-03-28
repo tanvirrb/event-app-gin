@@ -55,19 +55,19 @@ func (c *EventController) Get(ctx *gin.Context) {
 	})
 }
 
-//func (c *EventController) GetAll(ctx *gin.Context) {
-//	events, err := c.service.GetAll()
-//	if err != nil {
-//		ctx.JSON(http.StatusInternalServerError, gin.H{
-//			"error": err.Error(),
-//		})
-//		return
-//	}
-//	ctx.JSON(http.StatusOK, gin.H{
-//		"data": events,
-//	})
-//}
-//
+func (c *EventController) GetAll(ctx *gin.Context) {
+	events, err := c.service.GetAll()
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"data": events,
+	})
+}
+
 //func (c *EventController) Update(ctx *gin.Context) {
 //	id := ctx.Param("id")
 //	var event models.Event

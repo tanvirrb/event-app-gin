@@ -23,11 +23,10 @@ func (s *EventService) Get(id string) (*models.Event, error) {
 	return s.repo.Get(id)
 }
 
-//
-//func (s *EventService) GetAll() ([]*models.Event, error) {
-//	return s.repo.GetAll()
-//}
-//
+func (s *EventService) GetAll() ([]*models.Event, error) {
+	return s.repo.GetAll()
+}
+
 //func (s *EventService) Update(id string, e *models.Event) (*models.Event, error) {
 //	return s.repo.Update(id, e)
 //}
