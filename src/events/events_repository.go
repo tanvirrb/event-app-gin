@@ -3,22 +3,21 @@ package events
 import (
 	"context"
 	"errors"
-	"github.com/tanvirrb/event-app-go/src/configs"
+	"log"
+
 	"github.com/tanvirrb/event-app-go/src/events/interfaces"
 	"github.com/tanvirrb/event-app-go/src/events/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
 )
 
 type EventRepository struct {
 	collection *mongo.Collection
 }
 
-func NewEventRepository() interfaces.EventRepository {
-	eventCollection := configs.GetCollection(configs.DB, "events")
+func NewEventRepository(collection *mongo.Collection) interfaces.EventRepository {
 	return &EventRepository{
-		collection: eventCollection,
+		collection: collection,
 	}
 }
 

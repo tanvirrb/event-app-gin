@@ -4,19 +4,20 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/tanvirrb/event-app-go/src/configs"
-	"github.com/tanvirrb/event-app-go/src/router"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/tanvirrb/event-app-go/src/configs"
+	"github.com/tanvirrb/event-app-go/src/router"
 )
 
 type App struct {
-	server *http.Server
+	Server *http.Server
 }
 
 func NewApp(port string) *App {
@@ -35,14 +36,14 @@ func NewApp(port string) *App {
 	}
 
 	return &App{
-		server: server,
+		Server: server,
 	}
 }
 
 func (a *App) Start() {
 	serverErrors := make(chan error, 1)
 	go func() {
-		if err := a.server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		if err := a.Server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			serverErrors <- err
 		}
 	}()
@@ -62,7 +63,7 @@ func (a *App) Start() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := a.server.Shutdown(ctx); err != nil {
+	if err := a.Server.Shutdown(ctx); err != nil {
 		log.Printf("Server forced to shutdown: %v", err)
 	}
 
