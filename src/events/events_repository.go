@@ -71,12 +71,6 @@ func (r *EventRepository) GetAll() ([]*models.Event, error) {
 		log.Printf("Error while fetching events: %v", err)
 		return nil, err
 	}
-	defer func(eventListCursor *mongo.Cursor, ctx context.Context) {
-		err := eventListCursor.Close(ctx)
-		if err != nil {
-			log.Printf("Error while closing cursor: %v", err)
-		}
-	}(eventListCursor, ctx)
 
 	var events []*models.Event
 	if err = eventListCursor.All(ctx, &events); err != nil {
