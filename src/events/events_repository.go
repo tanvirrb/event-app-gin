@@ -98,7 +98,7 @@ func (r *EventRepository) Update(id string, event *models.Event) (*models.Event,
 		return nil, err
 	}
 
-	result := r.collection.FindOneAndUpdate(context.Background(), primitive.M{"_id": objectId}, primitive.M{"$set": event}, options.FindOneAndUpdate().SetReturnDocument(options.After))
+	result := r.collection.FindOneAndReplace(context.Background(), primitive.M{"_id": objectId}, event, options.FindOneAndReplace().SetReturnDocument(options.After))
 	if result.Err() != nil {
 		return nil, result.Err()
 	}
