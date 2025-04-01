@@ -20,33 +20,37 @@ var (
 	app *bootstrap.App
 )
 
-func setupTestApp(t *testing.T) {
+func TestMain(m *testing.M) {
 	err := os.Setenv("MONGODB_URI", "mongodb://mongodb:27017")
 	if err != nil {
-		return
+		os.Exit(1)
 	}
 
 	configs.SetDBName("event-app-test-db")
-
 	err = configs.ConnectDB()
-	assert.NoError(t, err, "Failed to connect to MongoDB")
-
-	testDB := configs.DB.Database("event-app-test-db")
-	err = testDB.Drop(context.Background())
-	assert.NoError(t, err, "Failed to drop test database")
+	if err != nil {
+		os.Exit(1)
+	}
 
 	app = bootstrap.NewApp("3002")
-}
 
-func teardownTestApp() {
+	code := m.Run()
+
 	if app != nil {
 		app.Cleanup()
 	}
+
+	os.Exit(code)
+}
+
+func setupTestDB(t *testing.T) {
+	testDB := configs.DB.Database("event-app-test-db")
+	err := testDB.Drop(context.Background())
+	assert.NoError(t, err, "Failed to drop test database")
 }
 
 func TestCreateEvent(t *testing.T) {
-	setupTestApp(t)
-	defer teardownTestApp()
+	setupTestDB(t)
 
 	event := models.Event{
 		Name:  "Test Event",
@@ -76,8 +80,7 @@ func TestCreateEvent(t *testing.T) {
 }
 
 func TestGetEvent(t *testing.T) {
-	setupTestApp(t)
-	defer teardownTestApp()
+	setupTestDB(t)
 
 	collection := configs.GetCollection("events")
 	repo := events.NewEventRepository(collection)
@@ -105,6 +108,38 @@ func TestGetEvent(t *testing.T) {
 
 	assert.Equal(t, event.Name, getEventResponse.Data.Name)
 	assert.Equal(t, event.Genre, getEventResponse.Data.Genre)
+}
+
+func TestGetAllEvents(t *testing.T) {
+	setupTestDB(t)
+
+	collection := configs.GetCollection("eventList")
+	repo := events.NewEventRepository(collection)
+	eventService := events.NewEventService(repo)
+
+	eventList := []*models.Event{
+		{Name: "Event 1", Genre: "Genre 1"},
+		{Name: "Event 2", Genre: "Genre 2"},
+	}
+
+	for _, event := range eventList {
+		_, err := eventService.Create(event)
+		assert.NoError(t, err)
+	}
+
+	req := httptest.NewRequest("GET", "/events", nil)
+	w := httptest.NewRecorder()
+	app.Server.Handler.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response struct {
+		Data []models.Event `json:"data"`
+	}
+	err := json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+
+	assert.GreaterOrEqual(t, len(response.Data), len(eventList))
 }
 
 //func TestGetAllEvents(t *testing.T) {
