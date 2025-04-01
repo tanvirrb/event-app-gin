@@ -5,6 +5,8 @@ import (
 	"errors"
 	"log"
 
+	"go.mongodb.org/mongo-driver/mongo/options"
+
 	"github.com/tanvirrb/event-app-go/src/events/interfaces"
 	"github.com/tanvirrb/event-app-go/src/events/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -89,16 +91,27 @@ func (r *EventRepository) GetAll() ([]*models.Event, error) {
 	return events, nil
 }
 
-//func (r *EventRepository) Update(id string, event *models.Event) (*models.Event, error) {
-//	_, exists := r.storage[id]
-//	if !exists {
-//		return nil, errors.New("event not found")
-//	}
-//	event.ID = id
-//	r.storage[id] = event
-//	return event, nil
-//}
-//
+func (r *EventRepository) Update(id string, event *models.Event) (*models.Event, error) {
+	objectId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.Printf("Invalid Object ID: %v", err)
+		return nil, err
+	}
+
+	result := r.collection.FindOneAndUpdate(context.Background(), primitive.M{"_id": objectId}, primitive.M{"$set": event}, options.FindOneAndUpdate().SetReturnDocument(options.After))
+	if result.Err() != nil {
+		return nil, result.Err()
+	}
+
+	var updatedEvent models.Event
+	err = result.Decode(&updatedEvent)
+	if err != nil {
+		return nil, err
+	}
+
+	return &updatedEvent, nil
+}
+
 //func (r *EventRepository) Delete(id string) error {
 //	_, exists := r.storage[id]
 //	if !exists {
