@@ -142,50 +142,6 @@ func TestGetAllEvents(t *testing.T) {
 	assert.GreaterOrEqual(t, len(response.Data), len(eventList))
 }
 
-//func TestGetAllEvents(t *testing.T) {
-//	setupTestApp(t)
-//	defer app.Cleanup()
-//
-//	// Create multiple events
-//	events := []models.Event{
-//		{
-//			Name:  "Event 1",
-//			Genre: "Genre 1",
-//		},
-//		{
-//			Name:  "Event 2",
-//			Genre: "Genre 2",
-//		},
-//	}
-//
-//	for _, event := range events {
-//		jsonData, err := json.Marshal(event)
-//		assert.NoError(t, err)
-//
-//		req := httptest.NewRequest("POST", "/events", bytes.NewBuffer(jsonData))
-//		req.Header.Set("Content-Type", "application/json")
-//		w := httptest.NewRecorder()
-//		app.Server.Handler.ServeHTTP(w, req)
-//		assert.Equal(t, http.StatusCreated, w.Code)
-//	}
-//
-//	// Get all events
-//	req := httptest.NewRequest("GET", "/events", nil)
-//	w := httptest.NewRecorder()
-//	app.Server.Handler.ServeHTTP(w, req)
-//
-//	assert.Equal(t, http.StatusOK, w.Code)
-//
-//	var response struct {
-//		Data []models.Event `json:"data"`
-//	}
-//	err := json.Unmarshal(w.Body.Bytes(), &response)
-//	assert.NoError(t, err)
-//
-//	// Assert we have at least the events we created
-//	assert.GreaterOrEqual(t, len(response.Data), len(events))
-//}
-//
 //func TestGetNonExistentEvent(t *testing.T) {
 //	setupTestApp(t)
 //	defer app.Cleanup()
