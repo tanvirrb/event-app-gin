@@ -1,18 +1,19 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/tanvirrb/event-app-go/src/router" // Update this import path to match your project structure
+	"github.com/tanvirrb/event-app-go/src/bootstrap"
+	"github.com/tanvirrb/event-app-go/src/helpers"
+	"log"
 )
 
 func main() {
-	route := gin.Default()
-	eventsRoutes := route.Group("/events")
-	router.RegisterEventsRoutes(eventsRoutes)
-
-	err := route.Run(":3001")
+	port, err := helpers.GetPortFromEnv()
 	if err != nil {
-		println("Error starting server : ", err.Error())
+		log.Printf("Failed to get port: %v", err)
 		return
 	}
+
+	app := bootstrap.NewApp(port)
+	defer app.Cleanup()
+	app.Start()
 }
