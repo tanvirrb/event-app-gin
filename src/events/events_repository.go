@@ -79,14 +79,9 @@ func (r *EventRepository) GetAll() ([]*models.Event, error) {
 	}(eventListCursor, ctx)
 
 	var events []*models.Event
-	for eventListCursor.Next(ctx) {
-		var event models.Event
-		err := eventListCursor.Decode(&event)
-		if err != nil {
-			log.Printf("Error while decoding event: %v", err)
-			return nil, err
-		}
-		events = append(events, &event)
+	if err = eventListCursor.All(ctx, &events); err != nil {
+		log.Printf("Error while fetching events: %v", err)
+		return nil, err
 	}
 	return events, nil
 }
