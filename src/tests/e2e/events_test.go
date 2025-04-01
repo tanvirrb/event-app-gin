@@ -21,7 +21,7 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	err := os.Setenv("MONGODB_URI", "mongodb://mongodb:27017")
+	err := os.Setenv("MONGODB_URI", "mongodb://mongodb-test:27017")
 	if err != nil {
 		os.Exit(1)
 	}

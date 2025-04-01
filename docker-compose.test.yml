@@ -1,8 +1,8 @@
 services:
-  mongodb:
+  mongodb-test:
     image: mongo:latest
     ports:
-      - "27017:27017"
+      - "27018:27017"
     command: ["mongod", "--quiet", "--logpath", "/dev/null"]
     healthcheck:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
@@ -10,14 +10,14 @@ services:
       timeout: 10s
       retries: 5
 
-  test:
+  app-test:
     build:
       context: .
       dockerfile: Dockerfile.test
     environment:
-      - MONGODB_URI=mongodb://mongodb:27017
+      - MONGODB_URI=mongodb://mongodb-test:27017
     volumes:
       - .:/app
     depends_on:
-      mongodb:
+      mongodb-test:
         condition: service_healthy 
