@@ -113,7 +113,7 @@ func TestGetEvent(t *testing.T) {
 func TestGetAllEvents(t *testing.T) {
 	setupTestDB(t)
 
-	collection := configs.GetCollection("eventList")
+	collection := configs.GetCollection("events")
 	repo := events.NewEventRepository(collection)
 	eventService := events.NewEventService(repo)
 
@@ -142,14 +142,43 @@ func TestGetAllEvents(t *testing.T) {
 	assert.GreaterOrEqual(t, len(response.Data), len(eventList))
 }
 
-//func TestGetNonExistentEvent(t *testing.T) {
-//	setupTestApp(t)
-//	defer app.Cleanup()
-//
-//	// Try to get a non-existent event with a valid ObjectID format
-//	req := httptest.NewRequest("GET", "/events/507f1f77bcf86cd799439011", nil)
-//	w := httptest.NewRecorder()
-//	app.Server.Handler.ServeHTTP(w, req)
-//
-//	assert.Equal(t, http.StatusNotFound, w.Code)
-//}
+func TestUpdateEvent(t *testing.T) {
+	setupTestDB(t)
+
+	collection := configs.GetCollection("events")
+	repo := events.NewEventRepository(collection)
+	eventService := events.NewEventService(repo)
+
+	event := &models.Event{
+		Name:  "Test Event",
+		Genre: "Test Genre",
+	}
+
+	createdEvent, err := eventService.Create(event)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, createdEvent.Id)
+
+	updatedEvent := &models.Event{
+		Name:  "Updated Event",
+		Genre: "Updated Genre",
+	}
+
+	jsonData, err := json.Marshal(updatedEvent)
+	assert.NoError(t, err)
+
+	req := httptest.NewRequest("PUT", "/events/"+createdEvent.Id.Hex(), bytes.NewBuffer(jsonData))
+
+	w := httptest.NewRecorder()
+	app.Server.Handler.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response struct {
+		Data models.Event `json:"data"`
+	}
+	err = json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+
+	assert.Equal(t, updatedEvent.Name, response.Data.Name)
+	assert.Equal(t, updatedEvent.Genre, response.Data.Genre)
+}
