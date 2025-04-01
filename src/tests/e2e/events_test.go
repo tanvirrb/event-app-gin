@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/tanvirrb/event-app-go/src/bootstrap"
 	"github.com/tanvirrb/event-app-go/src/configs"
+	"github.com/tanvirrb/event-app-go/src/events"
 	"github.com/tanvirrb/event-app-go/src/events/models"
 )
 
@@ -74,51 +75,38 @@ func TestCreateEvent(t *testing.T) {
 	assert.Equal(t, event.Genre, response.Data.Genre)
 }
 
-//func TestGetEvent(t *testing.T) {
-//	setupTestApp(t)
-//	defer app.Cleanup()
-//
-//	// First create an event
-//	event := models.Event{
-//		Name:  "Test Event",
-//		Genre: "Test Genre",
-//	}
-//
-//	jsonData, err := json.Marshal(event)
-//	assert.NoError(t, err)
-//
-//	createReq := httptest.NewRequest("POST", "/events", bytes.NewBuffer(jsonData))
-//	createReq.Header.Set("Content-Type", "application/json")
-//	createW := httptest.NewRecorder()
-//	app.Server.Handler.ServeHTTP(createW, createReq)
-//
-//	assert.Equal(t, http.StatusCreated, createW.Code)
-//
-//	var createResponse struct {
-//		Data models.Event `json:"data"`
-//	}
-//	err = json.Unmarshal(createW.Body.Bytes(), &createResponse)
-//	assert.NoError(t, err)
-//
-//	// Now get the created event
-//	getReq := httptest.NewRequest("GET", fmt.Sprintf("/events/%s", createResponse.Data.Id.Hex()), nil)
-//	getW := httptest.NewRecorder()
-//	app.Server.Handler.ServeHTTP(getW, getReq)
-//
-//	assert.Equal(t, http.StatusOK, getW.Code)
-//
-//	var response struct {
-//		Data models.Event `json:"data"`
-//	}
-//	err = json.Unmarshal(getW.Body.Bytes(), &response)
-//	assert.NoError(t, err)
-//
-//	// Assert response matches created event
-//	assert.Equal(t, createResponse.Data.Id, response.Data.Id)
-//	assert.Equal(t, createResponse.Data.Name, response.Data.Name)
-//	assert.Equal(t, createResponse.Data.Genre, response.Data.Genre)
-//}
-//
+func TestGetEvent(t *testing.T) {
+	setupTestApp(t)
+	defer teardownTestApp()
+
+	collection := configs.GetCollection("events")
+	repo := events.NewEventRepository(collection)
+	eventService := events.NewEventService(repo)
+	event := &models.Event{
+		Name:  "Test Event",
+		Genre: "Test Genre",
+	}
+
+	createdEvent, err := eventService.Create(event)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, createdEvent.Id)
+
+	req := httptest.NewRequest("GET", "/events/"+createdEvent.Id.Hex(), nil)
+	w := httptest.NewRecorder()
+	app.Server.Handler.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var getEventResponse struct {
+		Data models.Event `json:"data"`
+	}
+	err = json.Unmarshal(w.Body.Bytes(), &getEventResponse)
+	assert.NoError(t, err)
+
+	assert.Equal(t, event.Name, getEventResponse.Data.Name)
+	assert.Equal(t, event.Genre, getEventResponse.Data.Genre)
+}
+
 //func TestGetAllEvents(t *testing.T) {
 //	setupTestApp(t)
 //	defer app.Cleanup()
