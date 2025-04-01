@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-resty/resty/v2"
+	"io"
 	"reflect"
 )
 
@@ -17,7 +18,12 @@ func MakeRequest(method, url string, headers map[string]string, body interface{}
 	if err != nil {
 		return nil, err
 	}
-	defer resp.RawResponse.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println("Error closing response body:", err)
+		}
+	}(resp.RawResponse.Body)
 	fmt.Println("Body type", reflect.TypeOf(resp.Body))
 
 	var result map[string]interface{}
