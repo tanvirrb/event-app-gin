@@ -24,6 +24,7 @@ services:
       - mongodb_data:/data/db
     networks:
       - app-network
+    command: ["mongod", "--quiet", "--logpath", "/dev/null"]
 
 volumes:
   mongodb_data:
