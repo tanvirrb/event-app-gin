@@ -16,6 +16,8 @@ services:
       dockerfile: Dockerfile.test
     environment:
       - MONGODB_URI=mongodb://mongodb:27017
+    volumes:
+      - .:/app
     depends_on:
       mongodb:
         condition: service_healthy 
