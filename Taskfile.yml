@@ -18,3 +18,11 @@ tasks:
     cmds:
       - golangci-lint fmt
     silent: false
+  test:
+    cmds:
+      - go test -v ./src/tests/e2e/...
+    silent: false
+  docker-test:
+    cmds:
+      - docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit && docker-compose -f docker-compose.test.yml down
+    silent: false
