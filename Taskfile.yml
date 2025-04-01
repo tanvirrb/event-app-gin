@@ -23,3 +23,7 @@ tasks:
     cmds:
       - docker-compose -f docker-compose.test.yml down
     silent: false
+  tidy:
+    cmds:
+      - go mod tidy
+    silent: false
