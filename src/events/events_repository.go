@@ -101,11 +101,16 @@ func (r *EventRepository) Update(id string, event *models.Event) (*models.Event,
 	return &updatedEvent, nil
 }
 
-//func (r *EventRepository) Delete(id string) error {
-//	_, exists := r.storage[id]
-//	if !exists {
-//		return errors.New("event not found")
-//	}
-//	delete(r.storage, id)
-//	return nil
-//}
+func (r *EventRepository) Delete(id string) (string, error) {
+	objectId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.Printf("Invalid Object ID: %v", err)
+		return "", err
+	}
+	err = r.collection.FindOneAndDelete(context.Background(), primitive.M{"_id": objectId}).Decode(&models.Event{})
+	if err != nil {
+		log.Printf("Error while deleting event: %v", err)
+		return "", err
+	}
+	return id, nil
+}

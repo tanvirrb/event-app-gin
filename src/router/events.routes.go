@@ -16,5 +16,5 @@ func RegisterEventsRoutes(router *gin.RouterGroup) {
 	router.GET("/:id", controller.Get)
 	router.GET("", controller.GetAll)
 	router.PUT("/:id", controller.Update)
-	//router.DELETE("/:id", controller.Delete)
+	router.DELETE("/:id", controller.Delete)
 }

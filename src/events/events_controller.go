@@ -89,16 +89,16 @@ func (c *EventController) Update(ctx *gin.Context) {
 	})
 }
 
-//func (c *EventController) Delete(ctx *gin.Context) {
-//	id := ctx.Param("id")
-//	err := c.service.Delete(id)
-//	if err != nil {
-//		ctx.JSON(http.StatusInternalServerError, gin.H{
-//			"error": err.Error(),
-//		})
-//		return
-//	}
-//	ctx.JSON(http.StatusOK, gin.H{
-//		"message": "event deleted",
-//	})
-//}
+func (c *EventController) Delete(ctx *gin.Context) {
+	id := ctx.Param("id")
+	id, err := c.service.Delete(id)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Event deleted successfully with id: " + id,
+	})
+}

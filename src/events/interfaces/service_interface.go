@@ -9,5 +9,5 @@ type EventService interface {
 	Get(string) (*models.Event, error)
 	GetAll() ([]*models.Event, error)
 	Update(string, *models.Event) (*models.Event, error)
-	//Delete(string) error
+	Delete(string) (string, error)
 }

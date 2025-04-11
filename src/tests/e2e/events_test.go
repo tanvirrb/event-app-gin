@@ -182,3 +182,35 @@ func TestUpdateEvent(t *testing.T) {
 	assert.Equal(t, updatedEvent.Name, response.Data.Name)
 	assert.Equal(t, updatedEvent.Genre, response.Data.Genre)
 }
+
+func TestDeleteEvent(t *testing.T) {
+	setupTestDB(t)
+
+	collection := configs.GetCollection("events")
+	repo := events.NewEventRepository(collection)
+	eventService := events.NewEventService(repo)
+
+	event := &models.Event{
+		Name:  "Test Event",
+		Genre: "Test Genre",
+	}
+
+	createdEvent, err := eventService.Create(event)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, createdEvent.Id)
+
+	req := httptest.NewRequest("DELETE", "/events/"+createdEvent.Id.Hex(), nil)
+	w := httptest.NewRecorder()
+	app.Server.Handler.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var response struct {
+		Message string `json:"message"`
+	}
+	err = json.Unmarshal(w.Body.Bytes(), &response)
+	assert.NoError(t, err)
+
+	assert.NotEmpty(t, response.Message)
+	assert.IsType(t, "", response.Message)
+}

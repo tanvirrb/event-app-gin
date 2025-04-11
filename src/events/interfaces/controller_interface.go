@@ -9,5 +9,5 @@ type EventController interface {
 	Get(*gin.Context)
 	GetAll(*gin.Context)
 	Update(*gin.Context)
-	//Delete(*gin.Context)
+	Delete(*gin.Context)
 }

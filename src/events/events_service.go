@@ -31,6 +31,6 @@ func (s *EventService) Update(id string, e *models.Event) (*models.Event, error)
 	return s.repo.Update(id, e)
 }
 
-//func (s *EventService) Delete(id string) error {
-//	return s.repo.Delete(id)
-//}
+func (s *EventService) Delete(id string) (string, error) {
+	return s.repo.Delete(id)
+}
