@@ -21,13 +21,15 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	err := os.Setenv("MONGODB_URI", "mongodb://mongodb-test:27017")
-	if err != nil {
-		os.Exit(1)
+	if os.Getenv("MONGODB_URI") == "" {
+		err := os.Setenv("MONGODB_URI", "mongodb://localhost:27017")
+		if err != nil {
+			os.Exit(1)
+		}
 	}
 
 	configs.SetDBName("event-app-test-db")
-	err = configs.ConnectDB()
+	err := configs.ConnectDB()
 	if err != nil {
 		os.Exit(1)
 	}
