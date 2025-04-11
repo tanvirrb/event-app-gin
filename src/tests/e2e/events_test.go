@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/tanvirrb/event-app-gin/src/bootstrap"
@@ -36,7 +37,21 @@ func TestMain(m *testing.M) {
 
 	app = bootstrap.NewApp("3002")
 
+	go func() {
+		if err := app.Server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			os.Exit(1)
+		}
+	}()
+
+	time.Sleep(100 * time.Millisecond)
+
 	code := m.Run()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := app.Server.Shutdown(ctx); err != nil {
+		os.Exit(1)
+	}
 
 	if app != nil {
 		app.Cleanup()
