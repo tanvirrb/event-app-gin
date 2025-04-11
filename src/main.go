@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/tanvirrb/event-app-go/src/bootstrap"
-	"github.com/tanvirrb/event-app-go/src/helpers"
+	"github.com/tanvirrb/event-app-gin/src/bootstrap"
+	"github.com/tanvirrb/event-app-gin/src/helpers"
 	"log"
 )
 

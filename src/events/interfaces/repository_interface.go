@@ -1,7 +1,7 @@
 package interfaces
 
 import (
-	"github.com/tanvirrb/event-app-go/src/events/models"
+	"github.com/tanvirrb/event-app-gin/src/events/models"
 )
 
 type EventRepository interface {

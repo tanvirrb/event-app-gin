@@ -10,10 +10,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/tanvirrb/event-app-go/src/bootstrap"
-	"github.com/tanvirrb/event-app-go/src/configs"
-	"github.com/tanvirrb/event-app-go/src/events"
-	"github.com/tanvirrb/event-app-go/src/events/models"
+	"github.com/tanvirrb/event-app-gin/src/bootstrap"
+	"github.com/tanvirrb/event-app-gin/src/configs"
+	"github.com/tanvirrb/event-app-gin/src/events"
+	"github.com/tanvirrb/event-app-gin/src/events/models"
 )
 
 var (

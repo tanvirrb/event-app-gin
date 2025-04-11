@@ -1,4 +1,4 @@
-module github.com/tanvirrb/event-app-go
+module github.com/tanvirrb/event-app-gin
 
 go 1.24.1
 

@@ -2,8 +2,8 @@ package events
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/tanvirrb/event-app-go/src/events/interfaces"
-	"github.com/tanvirrb/event-app-go/src/events/models"
+	"github.com/tanvirrb/event-app-gin/src/events/interfaces"
+	"github.com/tanvirrb/event-app-gin/src/events/models"
 	"net/http"
 )
 

@@ -2,8 +2,8 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/tanvirrb/event-app-go/src/configs"
-	"github.com/tanvirrb/event-app-go/src/events"
+	"github.com/tanvirrb/event-app-gin/src/configs"
+	"github.com/tanvirrb/event-app-gin/src/events"
 )
 
 func RegisterEventsRoutes(router *gin.RouterGroup) {

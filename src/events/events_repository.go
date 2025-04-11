@@ -7,8 +7,8 @@ import (
 
 	"go.mongodb.org/mongo-driver/mongo/options"
 
-	"github.com/tanvirrb/event-app-go/src/events/interfaces"
-	"github.com/tanvirrb/event-app-go/src/events/models"
+	"github.com/tanvirrb/event-app-gin/src/events/interfaces"
+	"github.com/tanvirrb/event-app-gin/src/events/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )

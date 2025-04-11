@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/tanvirrb/event-app-go/src/configs"
-	"github.com/tanvirrb/event-app-go/src/router"
+	"github.com/tanvirrb/event-app-gin/src/configs"
+	"github.com/tanvirrb/event-app-gin/src/router"
 )
 
 type App struct {
