@@ -99,6 +99,6 @@ func (c *EventController) Delete(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{
-		"message": "Event deleted successfully with id: " + id,
+		"data": "Event deleted successfully with id: " + id,
 	})
 }

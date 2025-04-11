@@ -206,11 +206,11 @@ func TestDeleteEvent(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response struct {
-		Message string `json:"message"`
+		Data string `json:"data"`
 	}
 	err = json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 
-	assert.NotEmpty(t, response.Message)
-	assert.IsType(t, "", response.Message)
+	assert.NotEmpty(t, response.Data)
+	assert.IsType(t, "", response.Data)
 }
