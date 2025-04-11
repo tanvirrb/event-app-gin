@@ -10,7 +10,6 @@ A RESTful API for managing events built with Go, Gin framework, and MongoDB.
 - Hot reloading for development
 - End-to-end testing
 - Linting and formatting with golangci-lint
-- Swagger API documentation
 
 ## Prerequisites
 
@@ -19,7 +18,6 @@ A RESTful API for managing events built with Go, Gin framework, and MongoDB.
 - Task (optional, for running predefined tasks)
 - Air (optional, for hot reloading)
 - golangci-lint (optional, for linting and formatting)
-- swag (optional, for generating Swagger documentation)
 
 ## Getting Started
 
@@ -34,16 +32,6 @@ A RESTful API for managing events built with Go, Gin framework, and MongoDB.
 2. Install dependencies:
    ```bash
    go mod download
-   ```
-
-3. Install Swagger CLI (optional):
-   ```bash
-   go install github.com/swaggo/swag/cmd/swag@latest
-   ```
-
-4. Generate Swagger documentation:
-   ```bash
-   swag init -g main.go
    ```
 
 ### Running the Application
@@ -73,12 +61,6 @@ A RESTful API for managing events built with Go, Gin framework, and MongoDB.
    ```bash
    go run main.go
    ```
-
-## API Documentation
-
-The API documentation is available at:
-- Swagger UI: http://localhost:3001/swagger/index.html
-- Swagger JSON: http://localhost:3001/swagger/doc.json
 
 ### Events API
 
