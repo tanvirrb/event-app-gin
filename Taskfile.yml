@@ -8,11 +8,11 @@ vars:
 tasks:
   lint:
     cmds:
-      - golangci-lint run
+      - golangci-lint run --config .golangci.yml
     silent: false
   format:
     cmds:
-      - golangci-lint fmt
+      - golangci-lint --config .golangci.yml
     silent: false
   docker-test:
     cmds:
