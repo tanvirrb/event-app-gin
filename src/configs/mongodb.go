@@ -3,13 +3,21 @@ package configs
 import (
 	"context"
 	"fmt"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"os"
 	"time"
+
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var DB *mongo.Client
+var (
+	DB     *mongo.Client
+	dbName = "event-app-db"
+)
+
+func SetDBName(name string) {
+	dbName = name
+}
 
 func ConnectDB() error {
 	uri := os.Getenv("MONGODB_URI")
@@ -22,8 +30,10 @@ func ConnectDB() error {
 		return fmt.Errorf("failed to connect to MongoDB: %v", err)
 	}
 
-	err = client.Ping(context.Background(), nil)
-	if err != nil {
+	// Verify connection
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := client.Ping(ctx, nil); err != nil {
 		return fmt.Errorf("failed to ping MongoDB: %v", err)
 	}
 
@@ -32,8 +42,8 @@ func ConnectDB() error {
 	return nil
 }
 
-func GetCollection(client *mongo.Client, collection string) *mongo.Collection {
-	return client.Database("event-app-db").Collection(collection)
+func GetCollection(collection string) *mongo.Collection {
+	return DB.Database(dbName).Collection(collection)
 }
 
 func CloseDB() error {

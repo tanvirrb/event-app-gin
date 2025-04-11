@@ -3,22 +3,23 @@ package events
 import (
 	"context"
 	"errors"
-	"github.com/tanvirrb/event-app-go/src/configs"
-	"github.com/tanvirrb/event-app-go/src/events/interfaces"
-	"github.com/tanvirrb/event-app-go/src/events/models"
+	"log"
+
+	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"github.com/tanvirrb/event-app-gin/src/events/interfaces"
+	"github.com/tanvirrb/event-app-gin/src/events/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
 )
 
 type EventRepository struct {
 	collection *mongo.Collection
 }
 
-func NewEventRepository() interfaces.EventRepository {
-	eventCollection := configs.GetCollection(configs.DB, "events")
+func NewEventRepository(collection *mongo.Collection) interfaces.EventRepository {
 	return &EventRepository{
-		collection: eventCollection,
+		collection: collection,
 	}
 }
 
@@ -70,41 +71,46 @@ func (r *EventRepository) GetAll() ([]*models.Event, error) {
 		log.Printf("Error while fetching events: %v", err)
 		return nil, err
 	}
-	defer func(eventListCursor *mongo.Cursor, ctx context.Context) {
-		err := eventListCursor.Close(ctx)
-		if err != nil {
-			log.Printf("Error while closing cursor: %v", err)
-		}
-	}(eventListCursor, ctx)
 
 	var events []*models.Event
-	for eventListCursor.Next(ctx) {
-		var event models.Event
-		err := eventListCursor.Decode(&event)
-		if err != nil {
-			log.Printf("Error while decoding event: %v", err)
-			return nil, err
-		}
-		events = append(events, &event)
+	if err = eventListCursor.All(ctx, &events); err != nil {
+		log.Printf("Error while fetching events: %v", err)
+		return nil, err
 	}
 	return events, nil
 }
 
-//func (r *EventRepository) Update(id string, event *models.Event) (*models.Event, error) {
-//	_, exists := r.storage[id]
-//	if !exists {
-//		return nil, errors.New("event not found")
-//	}
-//	event.ID = id
-//	r.storage[id] = event
-//	return event, nil
-//}
-//
-//func (r *EventRepository) Delete(id string) error {
-//	_, exists := r.storage[id]
-//	if !exists {
-//		return errors.New("event not found")
-//	}
-//	delete(r.storage, id)
-//	return nil
-//}
+func (r *EventRepository) Update(id string, event *models.Event) (*models.Event, error) {
+	objectId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.Printf("Invalid Object ID: %v", err)
+		return nil, err
+	}
+
+	result := r.collection.FindOneAndReplace(context.Background(), primitive.M{"_id": objectId}, event, options.FindOneAndReplace().SetReturnDocument(options.After))
+	if result.Err() != nil {
+		return nil, result.Err()
+	}
+
+	var updatedEvent models.Event
+	err = result.Decode(&updatedEvent)
+	if err != nil {
+		return nil, err
+	}
+
+	return &updatedEvent, nil
+}
+
+func (r *EventRepository) Delete(id string) (string, error) {
+	objectId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.Printf("Invalid Object ID: %v", err)
+		return "", err
+	}
+	err = r.collection.FindOneAndDelete(context.Background(), primitive.M{"_id": objectId}).Decode(&models.Event{})
+	if err != nil {
+		log.Printf("Error while deleting event: %v", err)
+		return "", err
+	}
+	return id, nil
+}
