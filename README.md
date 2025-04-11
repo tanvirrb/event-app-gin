@@ -201,6 +201,7 @@ A RESTful API for managing events built with Go, Gin framework, and MongoDB.
 │   ├── events/        # Event domain
 │   ├── router/        # Route definitions
 │   └── tests/         # Tests
+├── .air.toml          # Air hot reload configuration
 ├── .golangci.yml      # Linter configuration
 ├── docker-compose.dev.yml  # Development Docker Compose
 ├── docker-compose.test.yml # Test Docker Compose
