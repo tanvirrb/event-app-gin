@@ -43,7 +43,16 @@ jobs:
       - name: Get dependencies
         run: go mod download
 
+      - name: Debug Environment
+        run: |
+          echo "Current environment variables:"
+          env | grep -E "MONGODB_URI|PORT"
+          echo "Current directory:"
+          pwd
+          echo "Test files:"
+          ls -la ./src/tests/e2e/
+
       - name: Run tests
         run: |
           echo "Running tests with MONGODB_URI: $MONGODB_URI and PORT: $PORT"
-          go test -v -count=1 ./src/tests/e2e/... 
+          go test -v -count=1 -json ./src/tests/e2e/... 
