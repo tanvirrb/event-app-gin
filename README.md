@@ -1,5 +1,7 @@
 # Event App with Gin and MongoDB
 
+[![Test](https://github.com/tanvirrb/event-app-gin/actions/workflows/test.yml/badge.svg)](https://github.com/tanvirrb/event-app-gin/actions/workflows/test.yml)
+
 A RESTful API for managing events built with Go, Gin framework, and MongoDB.
 
 ## Features
