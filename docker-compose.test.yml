@@ -1,23 +1,38 @@
 services:
-  mongodb-test:
-    image: mongo:latest
-    ports:
-      - "27018:27017"
-    command: ["mongod", "--quiet", "--logpath", "/dev/null"]
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-
   app-test:
     build:
       context: .
       dockerfile: Dockerfile.test
     environment:
-      - MONGODB_URI=mongodb://mongodb-test:27017
+      - DB_TYPE=${DB_TYPE:-mock}
+      - MONGODB_URI=${MONGODB_URI:-mongodb://mongodb:27017}
+      - DB_NAME=${DB_NAME:-event-app-test}
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - app-network
     volumes:
       - .:/app
-    depends_on:
-      mongodb-test:
-        condition: service_healthy 
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_test_data:/data/db
+    networks:
+      - app-network
+    command: ["mongod", "--quiet", "--logpath", "/dev/null"]
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mongodb_test_data:
+
+networks:
+  app-network:
+    driver: bridge 

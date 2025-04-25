@@ -16,9 +16,13 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        db_type: [mock, mongodb]
     env:
       MONGODB_URI: "mongodb://localhost:27017"
       PORT: "3002"
+      DB_TYPE: ${{ matrix.db_type }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -29,6 +33,7 @@ jobs:
           go-version: '1.24'
 
       - name: Set up MongoDB
+        if: matrix.db_type == 'mongodb'
         uses: supercharge/mongodb-github-action@1.12.0
 
       - name: Get dependencies

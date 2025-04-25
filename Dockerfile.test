@@ -2,14 +2,8 @@ FROM golang:1.24.1-alpine
 
 WORKDIR /app
 
-# Copy go mod and sum files
-COPY go.mod go.sum ./
-
-# Download dependencies
-RUN go mod download
-
-# Copy source code
 COPY . .
 
-# Run tests
+RUN go mod tidy && go mod download
+
 CMD ["go", "test", "-v", "./src/tests/e2e/..."] 

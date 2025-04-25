@@ -1,9 +1,9 @@
 package models
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import "github.com/google/uuid"
 
 type Event struct {
-	Id    primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
-	Name  string             `json:"name,omitempty" validate:"required"`
-	Genre string             `json:"genre,omitempty" validate:"required"`
+	Uuid  uuid.UUID `bson:"uuid" json:"uuid"`
+	Name  string    `json:"name,omitempty" validate:"required"`
+	Genre string    `json:"genre,omitempty" validate:"required"`
 }

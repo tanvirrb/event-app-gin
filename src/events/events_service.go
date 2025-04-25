@@ -1,6 +1,9 @@
 package events
 
 import (
+	"context"
+
+	"github.com/google/uuid"
 	"github.com/tanvirrb/event-app-gin/src/events/interfaces"
 	"github.com/tanvirrb/event-app-gin/src/events/models"
 )
@@ -15,22 +18,22 @@ func NewEventService(repo interfaces.EventRepository) interfaces.EventService {
 	}
 }
 
-func (s *EventService) Create(e *models.Event) (*models.Event, error) {
-	return s.repo.Create(e)
+func (s *EventService) Create(ctx context.Context, e *models.Event) (*models.Event, error) {
+	return s.repo.Create(ctx, e)
 }
 
-func (s *EventService) Get(id string) (*models.Event, error) {
-	return s.repo.Get(id)
+func (s *EventService) Get(ctx context.Context, uuid uuid.UUID) (*models.Event, error) {
+	return s.repo.Get(ctx, uuid)
 }
 
-func (s *EventService) GetAll() ([]*models.Event, error) {
-	return s.repo.GetAll()
+func (s *EventService) GetAll(ctx context.Context) ([]*models.Event, error) {
+	return s.repo.GetAll(ctx)
 }
 
-func (s *EventService) Update(id string, e *models.Event) (*models.Event, error) {
-	return s.repo.Update(id, e)
+func (s *EventService) Update(ctx context.Context, uuid uuid.UUID, e *models.Event) (*models.Event, error) {
+	return s.repo.Update(ctx, uuid, e)
 }
 
-func (s *EventService) Delete(id string) (string, error) {
-	return s.repo.Delete(id)
+func (s *EventService) Delete(ctx context.Context, uuid uuid.UUID) error {
+	return s.repo.Delete(ctx, uuid)
 }

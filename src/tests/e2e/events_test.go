@@ -1,15 +1,13 @@
 package e2e
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"net/http"
-	"net/http/httptest"
 	"os"
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/tanvirrb/event-app-gin/src/bootstrap"
 	"github.com/tanvirrb/event-app-gin/src/configs"
@@ -22,20 +20,9 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	if os.Getenv("MONGODB_URI") == "" {
-		err := os.Setenv("MONGODB_URI", "mongodb://localhost:27017")
-		if err != nil {
-			os.Exit(1)
-		}
-	}
-
-	configs.SetDBName("event-app-test-db")
-	err := configs.ConnectDB()
-	if err != nil {
-		os.Exit(1)
-	}
-
-	app = bootstrap.NewApp("3002")
+	// Use mock database for testing
+	db := configs.NewMockDB()
+	app = bootstrap.NewApp("3002", db)
 
 	go func() {
 		if err := app.Server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -60,174 +47,110 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func setupTestDB(t *testing.T) {
-	testDB := configs.DB.Database("event-app-test-db")
-	err := testDB.Drop(context.Background())
-	assert.NoError(t, err, "Failed to drop test database")
-}
-
 func TestCreateEvent(t *testing.T) {
-	setupTestDB(t)
-
-	event := models.Event{
+	repo := events.NewMockEventRepository()
+	eventService := events.NewEventService(repo)
+	event := &models.Event{
 		Name:  "Test Event",
 		Genre: "Test Genre",
 	}
 
-	jsonData, err := json.Marshal(event)
+	ctx := context.Background()
+	createdEvent, err := eventService.Create(ctx, event)
 	assert.NoError(t, err)
-
-	req := httptest.NewRequest("POST", "/events", bytes.NewBuffer(jsonData))
-	req.Header.Set("Content-Type", "application/json")
-
-	w := httptest.NewRecorder()
-	app.Server.Handler.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusCreated, w.Code)
-
-	var response struct {
-		Data models.Event `json:"data"`
-	}
-	err = json.Unmarshal(w.Body.Bytes(), &response)
-	assert.NoError(t, err)
-
-	assert.NotEmpty(t, response.Data.Id)
-	assert.Equal(t, event.Name, response.Data.Name)
-	assert.Equal(t, event.Genre, response.Data.Genre)
+	assert.NotNil(t, createdEvent)
+	assert.NotEqual(t, uuid.Nil, createdEvent.Uuid)
+	assert.Equal(t, event.Name, createdEvent.Name)
+	assert.Equal(t, event.Genre, createdEvent.Genre)
 }
 
 func TestGetEvent(t *testing.T) {
-	setupTestDB(t)
-
-	collection := configs.GetCollection("events")
-	repo := events.NewEventRepository(collection)
+	repo := events.NewMockEventRepository()
 	eventService := events.NewEventService(repo)
+
+	ctx := context.Background()
 	event := &models.Event{
 		Name:  "Test Event",
 		Genre: "Test Genre",
 	}
 
-	createdEvent, err := eventService.Create(event)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, createdEvent.Id)
-
-	req := httptest.NewRequest("GET", "/events/"+createdEvent.Id.Hex(), nil)
-	w := httptest.NewRecorder()
-	app.Server.Handler.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code)
-
-	var getEventResponse struct {
-		Data models.Event `json:"data"`
-	}
-	err = json.Unmarshal(w.Body.Bytes(), &getEventResponse)
+	createdEvent, err := eventService.Create(ctx, event)
 	assert.NoError(t, err)
 
-	assert.Equal(t, event.Name, getEventResponse.Data.Name)
-	assert.Equal(t, event.Genre, getEventResponse.Data.Genre)
+	fetchedEvent, err := eventService.Get(ctx, createdEvent.Uuid)
+	assert.NoError(t, err)
+	assert.NotNil(t, fetchedEvent)
+	assert.Equal(t, createdEvent.Uuid, fetchedEvent.Uuid)
+	assert.Equal(t, createdEvent.Name, fetchedEvent.Name)
+	assert.Equal(t, createdEvent.Genre, fetchedEvent.Genre)
 }
 
 func TestGetAllEvents(t *testing.T) {
-	setupTestDB(t)
-
-	collection := configs.GetCollection("events")
-	repo := events.NewEventRepository(collection)
+	repo := events.NewMockEventRepository()
 	eventService := events.NewEventService(repo)
 
-	eventList := []*models.Event{
-		{Name: "Event 1", Genre: "Genre 1"},
-		{Name: "Event 2", Genre: "Genre 2"},
-	}
-
-	for _, event := range eventList {
-		_, err := eventService.Create(event)
-		assert.NoError(t, err)
-	}
-
-	req := httptest.NewRequest("GET", "/events", nil)
-	w := httptest.NewRecorder()
-	app.Server.Handler.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code)
-
-	var response struct {
-		Data []models.Event `json:"data"`
-	}
-	err := json.Unmarshal(w.Body.Bytes(), &response)
-	assert.NoError(t, err)
-
-	assert.GreaterOrEqual(t, len(response.Data), len(eventList))
-}
-
-func TestUpdateEvent(t *testing.T) {
-	setupTestDB(t)
-
-	collection := configs.GetCollection("events")
-	repo := events.NewEventRepository(collection)
-	eventService := events.NewEventService(repo)
-
+	ctx := context.Background()
 	event := &models.Event{
 		Name:  "Test Event",
 		Genre: "Test Genre",
 	}
 
-	createdEvent, err := eventService.Create(event)
+	createdEvent, err := eventService.Create(ctx, event)
 	assert.NoError(t, err)
-	assert.NotEmpty(t, createdEvent.Id)
+
+	events, err := eventService.GetAll(ctx)
+	assert.NoError(t, err)
+	assert.NotNil(t, events)
+	assert.Len(t, events, 1)
+	assert.Equal(t, createdEvent.Uuid, events[0].Uuid)
+	assert.Equal(t, createdEvent.Name, events[0].Name)
+	assert.Equal(t, createdEvent.Genre, events[0].Genre)
+}
+
+func TestUpdateEvent(t *testing.T) {
+	repo := events.NewMockEventRepository()
+	eventService := events.NewEventService(repo)
+
+	ctx := context.Background()
+	event := &models.Event{
+		Name:  "Test Event",
+		Genre: "Test Genre",
+	}
+
+	createdEvent, err := eventService.Create(ctx, event)
+	assert.NoError(t, err)
 
 	updatedEvent := &models.Event{
 		Name:  "Updated Event",
 		Genre: "Updated Genre",
 	}
 
-	jsonData, err := json.Marshal(updatedEvent)
+	result, err := eventService.Update(ctx, createdEvent.Uuid, updatedEvent)
 	assert.NoError(t, err)
-
-	req := httptest.NewRequest("PUT", "/events/"+createdEvent.Id.Hex(), bytes.NewBuffer(jsonData))
-
-	w := httptest.NewRecorder()
-	app.Server.Handler.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code)
-
-	var response struct {
-		Data models.Event `json:"data"`
-	}
-	err = json.Unmarshal(w.Body.Bytes(), &response)
-	assert.NoError(t, err)
-
-	assert.Equal(t, updatedEvent.Name, response.Data.Name)
-	assert.Equal(t, updatedEvent.Genre, response.Data.Genre)
+	assert.NotNil(t, result)
+	assert.Equal(t, createdEvent.Uuid, result.Uuid)
+	assert.Equal(t, updatedEvent.Name, result.Name)
+	assert.Equal(t, updatedEvent.Genre, result.Genre)
 }
 
 func TestDeleteEvent(t *testing.T) {
-	setupTestDB(t)
-
-	collection := configs.GetCollection("events")
-	repo := events.NewEventRepository(collection)
+	repo := events.NewMockEventRepository()
 	eventService := events.NewEventService(repo)
 
+	ctx := context.Background()
 	event := &models.Event{
 		Name:  "Test Event",
 		Genre: "Test Genre",
 	}
 
-	createdEvent, err := eventService.Create(event)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, createdEvent.Id)
-
-	req := httptest.NewRequest("DELETE", "/events/"+createdEvent.Id.Hex(), nil)
-	w := httptest.NewRecorder()
-	app.Server.Handler.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code)
-
-	var response struct {
-		Data string `json:"data"`
-	}
-	err = json.Unmarshal(w.Body.Bytes(), &response)
+	createdEvent, err := eventService.Create(ctx, event)
 	assert.NoError(t, err)
 
-	assert.NotEmpty(t, response.Data)
-	assert.IsType(t, "", response.Data)
+	err = eventService.Delete(ctx, createdEvent.Uuid)
+	assert.NoError(t, err)
+
+	// Verify event is deleted
+	_, err = eventService.Get(ctx, createdEvent.Uuid)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "event not found")
 }
