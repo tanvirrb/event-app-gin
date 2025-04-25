@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/tanvirrb/event-app-gin/src/events/interfaces"
 	"github.com/tanvirrb/event-app-gin/src/events/models"
 )
@@ -42,8 +43,16 @@ func (c *EventController) Create(ctx *gin.Context) {
 }
 
 func (c *EventController) Get(ctx *gin.Context) {
-	id := ctx.Param("id")
-	event, err := c.service.Get(ctx.Request.Context(), id)
+	uuidStr := ctx.Param("uuid")
+	uuid, err := uuid.Parse(uuidStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid uuid format",
+		})
+		return
+	}
+
+	event, err := c.service.Get(ctx.Request.Context(), uuid)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -69,7 +78,15 @@ func (c *EventController) GetAll(ctx *gin.Context) {
 }
 
 func (c *EventController) Update(ctx *gin.Context) {
-	id := ctx.Param("id")
+	uuidStr := ctx.Param("uuid")
+	uuid, err := uuid.Parse(uuidStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid uuid format",
+		})
+		return
+	}
+
 	var event models.Event
 	if err := ctx.ShouldBindJSON(&event); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -77,7 +94,8 @@ func (c *EventController) Update(ctx *gin.Context) {
 		})
 		return
 	}
-	updatedEvent, err := c.service.Update(ctx.Request.Context(), id, &event)
+
+	updatedEvent, err := c.service.Update(ctx.Request.Context(), uuid, &event)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -91,8 +109,16 @@ func (c *EventController) Update(ctx *gin.Context) {
 }
 
 func (c *EventController) Delete(ctx *gin.Context) {
-	id := ctx.Param("id")
-	err := c.service.Delete(ctx.Request.Context(), id)
+	uuidStr := ctx.Param("uuid")
+	uuid, err := uuid.Parse(uuidStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid uuid format",
+		})
+		return
+	}
+
+	err = c.service.Delete(ctx.Request.Context(), uuid)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),

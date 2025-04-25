@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/tanvirrb/event-app-gin/src/bootstrap"
 	"github.com/tanvirrb/event-app-gin/src/configs"
@@ -58,7 +59,7 @@ func TestCreateEvent(t *testing.T) {
 	createdEvent, err := eventService.Create(ctx, event)
 	assert.NoError(t, err)
 	assert.NotNil(t, createdEvent)
-	assert.NotEmpty(t, createdEvent.Id)
+	assert.NotEqual(t, uuid.Nil, createdEvent.Uuid)
 	assert.Equal(t, event.Name, createdEvent.Name)
 	assert.Equal(t, event.Genre, createdEvent.Genre)
 }
@@ -76,10 +77,10 @@ func TestGetEvent(t *testing.T) {
 	createdEvent, err := eventService.Create(ctx, event)
 	assert.NoError(t, err)
 
-	fetchedEvent, err := eventService.Get(ctx, createdEvent.Id.Hex())
+	fetchedEvent, err := eventService.Get(ctx, createdEvent.Uuid)
 	assert.NoError(t, err)
 	assert.NotNil(t, fetchedEvent)
-	assert.Equal(t, createdEvent.Id, fetchedEvent.Id)
+	assert.Equal(t, createdEvent.Uuid, fetchedEvent.Uuid)
 	assert.Equal(t, createdEvent.Name, fetchedEvent.Name)
 	assert.Equal(t, createdEvent.Genre, fetchedEvent.Genre)
 }
@@ -101,7 +102,7 @@ func TestGetAllEvents(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, events)
 	assert.Len(t, events, 1)
-	assert.Equal(t, createdEvent.Id, events[0].Id)
+	assert.Equal(t, createdEvent.Uuid, events[0].Uuid)
 	assert.Equal(t, createdEvent.Name, events[0].Name)
 	assert.Equal(t, createdEvent.Genre, events[0].Genre)
 }
@@ -124,10 +125,10 @@ func TestUpdateEvent(t *testing.T) {
 		Genre: "Updated Genre",
 	}
 
-	result, err := eventService.Update(ctx, createdEvent.Id.Hex(), updatedEvent)
+	result, err := eventService.Update(ctx, createdEvent.Uuid, updatedEvent)
 	assert.NoError(t, err)
 	assert.NotNil(t, result)
-	assert.Equal(t, createdEvent.Id, result.Id)
+	assert.Equal(t, createdEvent.Uuid, result.Uuid)
 	assert.Equal(t, updatedEvent.Name, result.Name)
 	assert.Equal(t, updatedEvent.Genre, result.Genre)
 }
@@ -145,11 +146,11 @@ func TestDeleteEvent(t *testing.T) {
 	createdEvent, err := eventService.Create(ctx, event)
 	assert.NoError(t, err)
 
-	err = eventService.Delete(ctx, createdEvent.Id.Hex())
+	err = eventService.Delete(ctx, createdEvent.Uuid)
 	assert.NoError(t, err)
 
 	// Verify event is deleted
-	_, err = eventService.Get(ctx, createdEvent.Id.Hex())
+	_, err = eventService.Get(ctx, createdEvent.Uuid)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "event not found")
 }

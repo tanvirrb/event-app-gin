@@ -5,19 +5,19 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/tanvirrb/event-app-gin/src/events/interfaces"
 	"github.com/tanvirrb/event-app-gin/src/events/models"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type MockEventRepository struct {
-	events map[string]*models.Event
+	events map[uuid.UUID]*models.Event
 	mu     sync.RWMutex
 }
 
 func NewMockEventRepository() interfaces.EventRepository {
 	return &MockEventRepository{
-		events: make(map[string]*models.Event),
+		events: make(map[uuid.UUID]*models.Event),
 	}
 }
 
@@ -25,12 +25,12 @@ func (r *MockEventRepository) Create(ctx context.Context, event *models.Event) (
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	event.Id = primitive.NewObjectID()
-	r.events[event.Id.Hex()] = event
+	event.Uuid = uuid.New()
+	r.events[event.Uuid] = event
 	return event, nil
 }
 
-func (r *MockEventRepository) Get(ctx context.Context, id string) (*models.Event, error) {
+func (r *MockEventRepository) Get(ctx context.Context, id uuid.UUID) (*models.Event, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
@@ -52,7 +52,7 @@ func (r *MockEventRepository) GetAll(ctx context.Context) ([]*models.Event, erro
 	return events, nil
 }
 
-func (r *MockEventRepository) Update(ctx context.Context, id string, event *models.Event) (*models.Event, error) {
+func (r *MockEventRepository) Update(ctx context.Context, id uuid.UUID, event *models.Event) (*models.Event, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -60,12 +60,12 @@ func (r *MockEventRepository) Update(ctx context.Context, id string, event *mode
 		return nil, fmt.Errorf("event not found")
 	}
 
-	event.Id, _ = primitive.ObjectIDFromHex(id)
+	event.Uuid = id
 	r.events[id] = event
 	return event, nil
 }
 
-func (r *MockEventRepository) Delete(ctx context.Context, id string) error {
+func (r *MockEventRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
