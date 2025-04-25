@@ -23,10 +23,20 @@ tasks:
     cmds:
       - docker-compose -f docker-compose.dev.yml down
     silent: false
+  docker-test-mock:
+    cmds:
+      - DB_TYPE=mock docker-compose -f docker-compose.test.yml run --rm -e GIN_MODE=debug app-test go test -v -count=1 ./src/tests/e2e/...
+      - task: docker-test-down
+    silent: false
+  docker-test-mongodb:
+    cmds:
+      - DB_TYPE=mongodb docker-compose -f docker-compose.test.yml run --rm -e GIN_MODE=debug app-test go test -v -count=1 ./src/tests/e2e/...
+      - task: docker-test-down
+    silent: false
   docker-test:
     cmds:
-      - docker-compose -f docker-compose.test.yml run --rm -e GIN_MODE=debug app-test go test -v -count=1 ./src/tests/e2e/...
-      - task: docker-test-down
+      - task: docker-test-mock
+      - task: docker-test-mongodb
     silent: false
   docker-test-down:
     cmds:
