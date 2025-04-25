@@ -18,17 +18,19 @@ import (
 
 type App struct {
 	Server *http.Server
+	DB     configs.Database
 }
 
-func NewApp(port string) *App {
-	if err := configs.ConnectDB(); err != nil {
+func NewApp(port string, db configs.Database) *App {
+	ctx := context.Background()
+	if err := db.Connect(ctx); err != nil {
 		log.Printf("Failed to connect to database: %v", err)
 		os.Exit(1)
 	}
 
 	route := gin.Default()
 	eventsRoutes := route.Group("/events")
-	router.RegisterEventsRoutes(eventsRoutes)
+	router.RegisterEventsRoutes(eventsRoutes, db)
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%s", port),
@@ -37,6 +39,7 @@ func NewApp(port string) *App {
 
 	return &App{
 		Server: server,
+		DB:     db,
 	}
 }
 
@@ -71,7 +74,11 @@ func (a *App) Start() {
 }
 
 func (a *App) Cleanup() {
-	if err := configs.CloseDB(); err != nil {
-		log.Printf("Error closing database: %v", err)
+	if a.DB != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		if err := a.DB.Disconnect(ctx); err != nil {
+			log.Printf("Error closing database: %v", err)
+		}
 	}
 }

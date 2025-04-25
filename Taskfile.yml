@@ -25,12 +25,16 @@ tasks:
     silent: false
   docker-test:
     cmds:
-      - docker-compose -f docker-compose.test.yml run --rm -e GIN_MODE=debug app-test go test -v -count=1 ./src/tests/e2e/...
+      - docker-compose -f docker-compose.test.yml run --rm -e GIN_MODE=debug -e DB_TYPE=mock app-test go test -v -count=1 ./src/tests/e2e/...
       - task: docker-test-down
     silent: false
   docker-test-down:
     cmds:
       - docker-compose -f docker-compose.test.yml down
+    silent: false
+  test:
+    cmds:
+      - DB_TYPE=mock go test -v -count=1 ./src/tests/e2e/...
     silent: false
   tidy:
     cmds:

@@ -1,10 +1,11 @@
 package events
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/tanvirrb/event-app-gin/src/events/interfaces"
 	"github.com/tanvirrb/event-app-gin/src/events/models"
-	"net/http"
 )
 
 type EventController struct {
@@ -27,7 +28,7 @@ func (c *EventController) Create(ctx *gin.Context) {
 		return
 	}
 
-	createdEvent, err := c.service.Create(&event)
+	createdEvent, err := c.service.Create(ctx.Request.Context(), &event)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -38,12 +39,11 @@ func (c *EventController) Create(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{
 		"data": createdEvent,
 	})
-
 }
 
 func (c *EventController) Get(ctx *gin.Context) {
 	id := ctx.Param("id")
-	event, err := c.service.Get(id)
+	event, err := c.service.Get(ctx.Request.Context(), id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -56,7 +56,7 @@ func (c *EventController) Get(ctx *gin.Context) {
 }
 
 func (c *EventController) GetAll(ctx *gin.Context) {
-	events, err := c.service.GetAll()
+	events, err := c.service.GetAll(ctx.Request.Context())
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
@@ -77,11 +77,12 @@ func (c *EventController) Update(ctx *gin.Context) {
 		})
 		return
 	}
-	updatedEvent, err := c.service.Update(id, &event)
+	updatedEvent, err := c.service.Update(ctx.Request.Context(), id, &event)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
+		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
@@ -91,14 +92,15 @@ func (c *EventController) Update(ctx *gin.Context) {
 
 func (c *EventController) Delete(ctx *gin.Context) {
 	id := ctx.Param("id")
-	id, err := c.service.Delete(id)
+	err := c.service.Delete(ctx.Request.Context(), id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
+
 	ctx.JSON(http.StatusOK, gin.H{
-		"data": "Event deleted successfully with id: " + id,
+		"message": "Event deleted successfully",
 	})
 }
