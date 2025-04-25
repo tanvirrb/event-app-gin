@@ -19,28 +19,24 @@ func SetDBName(name string) {
 	dbName = name
 }
 
-// MongoDB implements the Database interface for MongoDB
 type MongoDB struct {
 	client   *mongo.Client
 	database *mongo.Database
 	config   *DatabaseConfig
 }
 
-// NewMongoDB creates a new MongoDB instance
 func NewMongoDB(config *DatabaseConfig) *MongoDB {
 	return &MongoDB{
 		config: config,
 	}
 }
 
-// Connect establishes a connection to MongoDB
 func (m *MongoDB) Connect(ctx context.Context) error {
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(m.config.URI))
 	if err != nil {
 		return fmt.Errorf("failed to connect to MongoDB: %v", err)
 	}
 
-	// Verify connection
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 	if err := client.Ping(ctx, nil); err != nil {
@@ -52,7 +48,6 @@ func (m *MongoDB) Connect(ctx context.Context) error {
 	return nil
 }
 
-// Disconnect closes the MongoDB connection
 func (m *MongoDB) Disconnect(ctx context.Context) error {
 	if m.client != nil {
 		return m.client.Disconnect(ctx)
@@ -60,12 +55,10 @@ func (m *MongoDB) Disconnect(ctx context.Context) error {
 	return nil
 }
 
-// GetCollection returns a collection from the database
 func (m *MongoDB) GetCollection(name string) *mongo.Collection {
 	return m.database.Collection(name)
 }
 
-// GetDatabase returns the database instance
 func (m *MongoDB) GetDatabase() *mongo.Database {
 	return m.database
 }
@@ -81,7 +74,6 @@ func ConnectDB() error {
 		return fmt.Errorf("failed to connect to MongoDB: %v", err)
 	}
 
-	// Verify connection
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := client.Ping(ctx, nil); err != nil {
